@@ -59,7 +59,7 @@ var cb = circuitbreaker.New()
 
 func getUserInfo(ctx context.Context, name string) (_ *User,err error) {
   if !cb.Ready() {
-    return nil, circuitbreaker.ErrOpened
+    return nil, circuitbreaker.ErrOpen
   }
   defer func() { err = cb.Done(ctx, err) }
 
@@ -81,7 +81,7 @@ The same for timeouts configuration. Especially on gRPC, clients are able to set
 Sometimes, we would like to receive an error from a protected operation but don't want to mark the request as a failure. For example, a case that protected HTTP request responded 404 NotFound. This application-level error is obviously not caused by a failure, so that we'd like to return nil error, but want to receive non-nil error. Because `go-circuitbreaker` is able to receive errors from protected operations without making them as failures, you don't need to write complicated error handlings in order to achieve your goal.
 
 ```go
-cb := circuitbreaker.New(nil)
+cb := circuitbreaker.New()
 
 data, err := cb.Do(context.Background(), func() (interface{}, error) {
   u, err := fetchUserInfo("john")

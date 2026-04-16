@@ -350,7 +350,7 @@ func New(opts ...BreakerOption) *CircuitBreaker {
 	return cb
 }
 
-// An Operation is executed by Do method.
+// An Operation is executed by Do().
 //
 // Deprecated: Use the package-level generic function Do instead.
 type Operation func() (any, error)
@@ -359,7 +359,24 @@ type Operation func() (any, error)
 // cb.Ready() is true. If not ready, cb doesn't execute f and returns
 // ErrOpen.
 //
-// Deprecated: Use the package-level generic function Do instead for type safety.
+// If o returns a nil-error, cb counts the execution of Operation as a
+// success. Otherwise, cb count it as a failure.
+//
+// If o returns a *IgnorableError, Do() ignores the result of operation and
+// returns the wrapped error.
+//
+// If o returns a *SuccessMarkableError, Do() count it as a success and returns
+// the wrapped error.
+//
+// If given Options' FailOnContextCancel is false (default), cb.Do
+// doesn't mark the Operation's error as a failure if ctx.Err() returns
+// context.Canceled.
+//
+// If given Options' FailOnContextDeadline is false (default), cb.Do
+// doesn't mark the Operation's error as a failure if ctx.Err() returns
+// context.DeadlineExceeded.
+//
+// Deprecated: Use the package-level generic function Do instead.
 func (cb *CircuitBreaker) Do(ctx context.Context, o Operation) (any, error) {
 	if !cb.Ready() {
 		return nil, ErrOpen
@@ -368,18 +385,26 @@ func (cb *CircuitBreaker) Do(ctx context.Context, o Operation) (any, error) {
 	return result, cb.Done(ctx, err)
 }
 
-// Do executes the operation o with type safety using generics.
-// If cb.Ready() is true, it executes o and returns the result.
-// If not ready, it returns the zero value of T and ErrOpen.
+// Do executes the operation o and returns the return values if
+// cb.Ready() is true. If not ready, it returns the zero value of T and
+// ErrOpen.
 //
-// If o returns a nil-error, cb counts the execution as a success.
-// Otherwise, cb counts it as a failure.
+// If o returns a nil-error, cb counts the execution of Operation as a
+// success. Otherwise, cb count it as a failure.
 //
-// If o returns a *IgnorableError, Do ignores the result of operation and
+// If o returns a *IgnorableError, Do() ignores the result of operation and
 // returns the wrapped error.
 //
-// If o returns a *SuccessMarkableError, Do counts it as a success and returns
+// If o returns a *SuccessMarkableError, Do() count it as a success and returns
 // the wrapped error.
+//
+// If given Options' FailOnContextCancel is false (default), Do
+// doesn't mark the Operation's error as a failure if ctx.Err() returns
+// context.Canceled.
+//
+// If given Options' FailOnContextDeadline is false (default), Do
+// doesn't mark the Operation's error as a failure if ctx.Err() returns
+// context.DeadlineExceeded.
 func Do[T any](cb *CircuitBreaker, ctx context.Context, o func() (T, error)) (T, error) {
 	if !cb.Ready() {
 		var zero T

@@ -23,7 +23,7 @@ func fetchUserInfo(ctx context.Context, name string) (*user, error) {
 }
 
 func ExampleCircuitBreaker() {
-	cb := circuitbreaker.New(nil)
+	cb := circuitbreaker.New()
 	ctx := context.Background()
 
 	data, err := cb.Do(context.Background(), func() (interface{}, error) {

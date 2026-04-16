@@ -412,10 +412,10 @@ func (cb *CircuitBreaker) Fail() {
 // error, no Fail() called.
 func (cb *CircuitBreaker) FailWithContext(ctx context.Context) {
 	if ctxErr := ctx.Err(); ctxErr != nil {
-		if ctxErr == context.Canceled && !cb.failOnContextCancel {
+		if errors.Is(ctxErr, context.Canceled) && !cb.failOnContextCancel {
 			return
 		}
-		if ctxErr == context.DeadlineExceeded && !cb.failOnContextDeadline {
+		if errors.Is(ctxErr, context.DeadlineExceeded) && !cb.failOnContextDeadline {
 			return
 		}
 	}
@@ -432,12 +432,14 @@ func (cb *CircuitBreaker) Done(ctx context.Context, err error) error {
 		return nil
 	}
 
-	if successMarkableErr, ok := err.(*SuccessMarkableError); ok {
+	var successMarkableErr *SuccessMarkableError
+	if errors.As(err, &successMarkableErr) {
 		cb.Success()
 		return successMarkableErr.Unwrap()
 	}
 
-	if ignorableErr, ok := err.(*IgnorableError); ok {
+	var ignorableErr *IgnorableError
+	if errors.As(err, &ignorableErr) {
 		return ignorableErr.Unwrap()
 	}
 

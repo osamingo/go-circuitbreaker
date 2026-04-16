@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	backoff "github.com/cenkalti/backoff/v3"
+	backoff "github.com/cenkalti/backoff/v5"
 )
 
 var (
@@ -39,7 +39,6 @@ const (
 // DefaultOpenBackOff returns defaultly used BackOff.
 func DefaultOpenBackOff() backoff.BackOff {
 	_backoff := backoff.NewExponentialBackOff()
-	_backoff.MaxElapsedTime = 0
 	_backoff.Reset()
 	return _backoff
 }
@@ -309,18 +308,20 @@ func defaultOptions() *options {
 // An example of the constructor would be like this:
 //
 // cb := circuitbreaker.New(
-//     circuitbreaker.WithClock(clock.New()),
-//     circuitbreaker.WithFailOnContextCancel(true),
-//     circuitbreaker.WithFailOnContextDeadline(true),
-//     circuitbreaker.WithHalfOpenMaxSuccesses(10),
-//     circuitbreaker.WithOpenTimeoutBackOff(backoff.NewExponentialBackOff()),
-//     circuitbreaker.WithOpenTimeout(10*time.Second),
-//     circuitbreaker.WithCounterResetInterval(10*time.Second),
-//     // we also have NewTripFuncThreshold and NewTripFuncConsecutiveFailures
-//     circuitbreaker.WithTripFunc(circuitbreaker.NewTripFuncFailureRate(10, 0.4)),
-//     circuitbreaker.WithOnStateChangeHookFn(func(from, to circuitbreaker.State) {
-//       log.Printf("state changed from %s to %s\n", from, to)
-// 	}),
+//
+//	    circuitbreaker.WithClock(clock.New()),
+//	    circuitbreaker.WithFailOnContextCancel(true),
+//	    circuitbreaker.WithFailOnContextDeadline(true),
+//	    circuitbreaker.WithHalfOpenMaxSuccesses(10),
+//	    circuitbreaker.WithOpenTimeoutBackOff(backoff.NewExponentialBackOff()),
+//	    circuitbreaker.WithOpenTimeout(10*time.Second),
+//	    circuitbreaker.WithCounterResetInterval(10*time.Second),
+//	    // we also have NewTripFuncThreshold and NewTripFuncConsecutiveFailures
+//	    circuitbreaker.WithTripFunc(circuitbreaker.NewTripFuncFailureRate(10, 0.4)),
+//	    circuitbreaker.WithOnStateChangeHookFn(func(from, to circuitbreaker.State) {
+//	      log.Printf("state changed from %s to %s\n", from, to)
+//		}),
+//
 // )
 //
 // The default options are described in the defaultOptions function
